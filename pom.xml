@@ -77,11 +77,10 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				 <version>3.3.1</version>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.2.0</version>
 				<configuration>
-					<source>10</source>
-					<target>10</target>
+					<propertiesEncoding>ISO-8859-1</propertiesEncoding>
 				</configuration>
 			</plugin>
 			<plugin>
