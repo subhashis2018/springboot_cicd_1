@@ -16,7 +16,7 @@ class CalculatorTest {
         calculator = new Calculator();
     }
 
-    @Test                                               
+    @Test                             
     @DisplayName("Simple multiplication should work")   
     void testMultiply() {
         assertEquals(20, calculator.multiply(4, 5),     
