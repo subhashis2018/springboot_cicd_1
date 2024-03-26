@@ -22,7 +22,7 @@ class CalculatorTest {
         assertEquals(20, calculator.multiply(4, 5),     
                 "Regular multiplication should work");  
     }
-
+ 
     @RepeatedTest(5)                                    
     @DisplayName("Ensure correct handling of zero")
     void testMultiplyWithZero() {
