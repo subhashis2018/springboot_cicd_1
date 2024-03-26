@@ -29,5 +29,5 @@ class CalculatorTest {
         assertEquals(0, calculator.multiply(0, 5), "Multiple with zero should be zero");
         assertEquals(0, calculator.multiply(5, 0), "Multiple with zero should be zero");
     }
-
+  
 }
