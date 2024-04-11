@@ -31,22 +31,13 @@ jobs:
         restore-keys: ${{ runner.os }}-maven-
         
     - name: Build with Maven
-      run: mvn -B clean install sonar:sonar
+      run: mvn -B clean install
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         
-    - name: Run PMD static analysis
-      run: mvn -B pmd:pmd
-        
-    - name: Run JUnit tests and generate Jacoco report
-      run: mvn -B test jacoco:report
-      
-    - name: Upload Jacoco report
-      uses: actions/upload-artifact@v2
-      with:
-        name: jacoco-report
-        path: target/site/jacoco/jacoco.xml
-        
-    - name: Upload PMD report
-      uses: actions/upload-artifact@v2
-      with:
-        name: pmd-report
-        path: target/site/pmd/pmd.xml
+    - name: Analyze with SonarCloud
+      run: mvn sonar:sonar -Dsonar.organization=<your_organization_key> -Dsonar.projectKey=<your_project_key>
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
