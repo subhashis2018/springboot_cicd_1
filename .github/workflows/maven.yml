@@ -68,7 +68,7 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    needs: [clean-compile-test, sonar-analysis, pmd-analysis, jacoco-report]
+    needs: [clean-compile-test, pmd-analysis, jacoco-report]
 
     steps:
       - name: Upload Jacoco report
