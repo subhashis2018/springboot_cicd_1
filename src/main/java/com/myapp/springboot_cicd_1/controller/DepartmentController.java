@@ -3,6 +3,7 @@ package com.myapp.springboot_cicd_1.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,9 +22,17 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @Slf4j
 public class DepartmentController {
+	
+	@Value("${welcome.message}")
+	private String welcome;
 
 	@Autowired
 	private DepartmentService departmentService;
+	
+	@GetMapping("/message")
+	public String message() {
+		return welcome;
+	}
 
 	@PostMapping("/departments")
 	public Department saveDepartment(@Valid @RequestBody Department department) {
