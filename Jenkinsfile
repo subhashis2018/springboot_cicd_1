@@ -15,7 +15,7 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 git branch: "${BRANCH_NAME}",url: "${GIT_REPO_URL}",credentialsId: 'github-uname-password'
-                sh 'git clone ${GIT_REPO_URL}'
+                
             }
         }
         stage('Maven Clean') {
