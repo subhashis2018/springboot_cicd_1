@@ -8,13 +8,12 @@ pipeline {
 
     environment {
         GIT_REPO_URL = 'https://github.com/subhashis2018/springboot_cicd_1.git'
-        BRANCH_NAME = 'main'
     }
 
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: "${BRANCH_NAME}",url: "${GIT_REPO_URL}",credentialsId: 'github-uname-password'
+                git branch: "${env.BRANCH_NAME}",url: "${GIT_REPO_URL}",credentialsId: 'github-uname-password'
                 
             }
         }
@@ -32,6 +31,31 @@ pipeline {
         stage('Maven Test') {
             steps {
                 sh 'mvn test'
+            }
+        }
+        stage('PMD Analysis') {
+            steps {
+                script {
+                    sh 'mvn pmd:pmd'
+                }
+            }
+            post {
+                always {
+                    pmd canComputeNew: false, pattern: '**/target/pmd.xml'
+                }
+            }
+        }
+
+        stage('Jacoco Test Report') {
+            steps {
+                script {
+                    sh 'mvn jacoco:report'
+                }
+            }
+            post {
+                always {
+                    jacoco execPattern: '**/target/jacoco.exec', classPattern: '**/target/classes', sourcePattern: '**/src/main/java'
+                }
             }
         }
     }
