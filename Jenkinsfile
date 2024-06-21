@@ -13,7 +13,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: "${env.BRANCH_NAME}",url: "${GIT_REPO_URL}",credentialsId: 'github-uname-password'
+                git branch: "${env.BRANCH_NAME}",url: "${GIT_REPO_URL}",credentialsId: 'github-auth'
                 
             }
         }
