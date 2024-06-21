@@ -4,6 +4,7 @@ pipeline {
      tools {
         maven 'maven-3.9.6' // Adjust the Maven version as per your installation
         jdk 'jdk-17' // Adjust the JDK version as per your installation
+         git 'git'
      }
 
     environment {
