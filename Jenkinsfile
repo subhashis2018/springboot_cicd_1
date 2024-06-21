@@ -1,77 +1,69 @@
 pipeline {
-    agent any
+    agent none
 
-     tools {
-        maven 'maven-3.9.6' // Adjust the Maven version as per your installation
-        jdk 'jdk-17' // Adjust the JDK version as per your installation
-         git 'git'
-     }
+    tools {
+        // Install the Maven version configured as "M3" and add it to the path.
+        maven 'mymaven'
+    }
+
     parameters {
-        string(name:'Env', defaultValue:'Test', description:'version to deploy')
-        booleanParam(name:'executeTests', defaultValue: true, description:'decide to run tc')
-        choice(name:'APPVERSION', choices:['1.1', '1.2', '1.3'])
+        string(name: 'Env', defaultValue: 'Test', description: 'version to deploy')
+        booleanParam(name: 'executeTests', defaultValue: true, description: 'decide to run tc')
+        choice(name: 'APPVERSION', choices: ['1.1', '1.2', '1.3'], description: 'Application Version')
+        choice(name: 'DEPLOYMENT_ENV', choices: ['Dev', 'QA', 'Prod'], description: 'Deployment Environment')
+        booleanParam(name: 'ENABLE_LOGGING', defaultValue: false, description: 'Enable detailed logging')
+        booleanParam(name: 'ENABLE_MONITORING', defaultValue: false, description: 'Enable monitoring')
     }
 
     environment {
-        GIT_REPO_URL = 'https://github.com/subhashis2018/springboot_cicd_1.git'
+        PACKAGE_SERVER = 'ec2-user@172.31.7.45'
     }
 
     stages {
-        stage('Clone Repository') {
+        stage('Compile') {
+            agent { label 'linux_slave' }
             steps {
-                git branch: "${env.BRANCH_NAME}",url: "${GIT_REPO_URL}",credentialsId: 'github-auth'
-                
+                echo "compiling the code ${params.APPVERSION}"
+                sh 'mvn compile'
             }
         }
-        stage('Maven Clean') {
-            steps {
-                sh 'mvn clean'
+        stage('UnitTest') {
+            agent any
+            when {
+                expression {
+                    params.executeTests == true
+                }
             }
-        }
-
-        stage('Maven Build') {
-            steps {
-                sh 'mvn package'
-            }
-        }
-        stage('Maven Test') {
-            steps {
-                sh 'mvn test'
-            }
-        }
-        //stage('PMD Analysis') {
-        //    steps {
-        //      script {
-          //        sh 'mvn pmd:pmd'
-            //  }
-         // }
-       //    post {
-        //      always {
-        //          pmd canComputeNew: false, pattern: '**/target/pmd.xml'
-        //      }
-       //   }
-       // }
-
-        stage('Jacoco Test Report') {
             steps {
                 script {
-                    sh 'mvn jacoco:report'
-                }
-            }
-            post {
-                always {
-                    jacoco execPattern: '**/target/jacoco.exec', classPattern: '**/target/classes', sourcePattern: '**/src/main/java'
+                    echo 'Test the code'
+                    sh 'mvn test'
                 }
             }
         }
-    }
-
-    post {
-        success {
-            echo 'Build completed successfully!'
+        stage('Package') {
+            agent any
+            steps {
+                script {
+                    sshagent(['slave2']) {
+                        echo "Package the code ${params.Env}"
+                        sh "scp -o StrictHostKeyChecking=no server-config.sh ${PACKAGE_SERVER}:/home/ec2-user"
+                        sh "ssh -o StrictHostKeyChecking=no ${PACKAGE_SERVER} 'bash ~/server-config.sh'"
+                    }
+                }
+            }
         }
-        failure {
-            echo 'Build failed!'
+        stage('DEPLOY') {
+            input {
+                message 'Select the PLATFORM to deploy'
+                ok 'PLATFORM Selected'
+                parameters {
+                    choice(name: 'PLATFORM', choices: ['EKS', 'ONPREM_K8s', 'SERVERS'], description: 'Deployment Platform')
+                }
+            }
+            steps {
+                echo "DEPLOY the code ${params.Env} to ${params.PLATFORM}"
+            }
         }
     }
 }
