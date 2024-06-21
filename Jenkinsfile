@@ -32,7 +32,9 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: "${params.BRANCH_NAME}", url: "${GIT_REPO_URL}", credentialsId: 'github-auth'
+                script {
+                    git branch: "${params.BRANCH_NAME}", url: "${GIT_REPO_URL}", credentialsId: 'github-auth'
+                }
             }
         }
         stage('Maven Clean') {
