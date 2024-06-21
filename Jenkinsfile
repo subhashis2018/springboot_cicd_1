@@ -6,6 +6,11 @@ pipeline {
         jdk 'jdk-17' // Adjust the JDK version as per your installation
          git 'git'
      }
+    parameters {
+        string(name:'Env', defaultValue:'Test', description:'version to deploy')
+        booleanParam(name:'executeTests', defaultValue: true, description:'decide to run tc')
+        choice(name:'APPVERSION', choices:['1.1', '1.2', '1.3'])
+    }
 
     environment {
         GIT_REPO_URL = 'https://github.com/subhashis2018/springboot_cicd_1.git'
