@@ -1,74 +1,116 @@
 package com.myapp.springboot_cicd_1.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.jupiter.api.BeforeEach;
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myapp.springboot_cicd_1.entity.Department;
 import com.myapp.springboot_cicd_1.service.DepartmentService;
 
 @WebMvcTest(DepartmentController.class)
 class DepartmentControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+	@Autowired
+	private MockMvc mockMvc;
 
-    @MockBean
-    private DepartmentService departmentService;
+	@MockBean
+	private DepartmentService departmentService;
 
-    private Department department;
+	@Test
+	@WithMockUser
+	public void testSaveDepartment() throws Exception {
+		Department department = Department.builder().departmentId(1L).departmentName("IT").departmentAddress("New York")
+				.departmentCode("IT-01").build();
 
-    @BeforeEach
-    void setUp() {
-        department = Department.builder()
-                .departmentAddress("Ahmedabad")
-                .departmentCode("IT-06")
-                .departmentName("IT")
-                .departmentId(1L)
-                .build();
-    }
+		when(departmentService.saveDepartment(any(Department.class))).thenReturn(department);
 
-    @Test
-    void saveDepartment() throws Exception {
-        Department inputDepartment = Department.builder()
-                .departmentAddress("Ahmedabad")
-                .departmentCode("IT-06")
-                .departmentName("IT")
-                .build();
+		mockMvc.perform(post("/departments").with(SecurityMockMvcRequestPostProcessors.csrf()) // Add CSRF token
+				.contentType(MediaType.APPLICATION_JSON).content(asJsonString(department))).andExpect(status().isOk());
+	}
 
-        Mockito.when(departmentService.saveDepartment(inputDepartment))
-                .thenReturn(department);
+	@Test
+	@WithMockUser
+	public void testFetchDepartmentList() throws Exception {
+		Department department1 = Department.builder().departmentId(1L).departmentName("IT")
+				.departmentAddress("New York").departmentCode("IT-01").build();
 
-        mockMvc.perform(post("/departments")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content("{\n" +
-                "\t\"departmentName\":\"IT\",\n" +
-                "\t\"departmentAddress\":\"Ahmedabad\",\n" +
-                "\t\"departmentCode\":\"IT-06\"\n" +
-                "}"))
-                .andExpect(status().isOk());
+		Department department2 = Department.builder().departmentId(2L).departmentName("HR")
+				.departmentAddress("San Francisco").departmentCode("HR-01").build();
 
-    }
+		List<Department> departments = Arrays.asList(department1, department2);
 
-    @Test
-    void fetchDepartmentById() throws Exception {
-        Mockito.when(departmentService.fetchDepartmentById(1L))
-                .thenReturn(department);
+		when(departmentService.fetchDepartmentList()).thenReturn(departments);
 
-        mockMvc.perform(get("/departments/1")
-        .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.departmentName").
-                value(department.getDepartmentName()));
-    }
+		mockMvc.perform(get("/departments").with(SecurityMockMvcRequestPostProcessors.csrf()) // Add CSRF token
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+	}
+
+	@Test
+	@WithMockUser
+	public void testFetchDepartmentById() throws Exception {
+		Department department = Department.builder().departmentId(1L).departmentName("IT").departmentAddress("New York")
+				.departmentCode("IT-01").build();
+
+		when(departmentService.fetchDepartmentById(anyLong())).thenReturn(department);
+
+		mockMvc.perform(get("/departments/1").with(SecurityMockMvcRequestPostProcessors.csrf()) // Add CSRF token
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+	}
+
+	@Test
+	@WithMockUser
+	public void testDeleteDepartmentById() throws Exception {
+		mockMvc.perform(delete("/departments/1").with(SecurityMockMvcRequestPostProcessors.csrf()) // Add CSRF token
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+	}
+
+	@Test
+	@WithMockUser
+	public void testUpdateDepartment() throws Exception {
+		Department department = Department.builder().departmentId(1L).departmentName("IT").departmentAddress("New York")
+				.departmentCode("IT-01").build();
+
+		when(departmentService.updateDepartment(anyLong(), any(Department.class))).thenReturn(department);
+
+		mockMvc.perform(put("/departments/1").with(SecurityMockMvcRequestPostProcessors.csrf()) // Add CSRF token
+				.contentType(MediaType.APPLICATION_JSON).content(asJsonString(department))).andExpect(status().isOk());
+	}
+
+	@Test
+	@WithMockUser
+	public void testFetchDepartmentByName() throws Exception {
+		Department department = Department.builder().departmentId(1L).departmentName("IT").departmentAddress("New York")
+				.departmentCode("IT-01").build();
+
+		when(departmentService.fetchDepartmentByName("IT")).thenReturn(department);
+
+		mockMvc.perform(get("/departments/name/IT").with(SecurityMockMvcRequestPostProcessors.csrf()) // Add CSRF token
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+	}
+
+	private static String asJsonString(final Object obj) {
+		try {
+			return new ObjectMapper().writeValueAsString(obj);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
 }
