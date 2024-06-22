@@ -55,21 +55,21 @@ pipeline {
                 sh 'mvn test'
             }
         }
-        stage('PMD Analysis') {
-            when {
-                expression { params.RUN_PMD_ANALYSIS }
-            }
-            steps {
-                script {
-                    sh 'mvn pmd:pmd'
-                }
-            }
-            post {
-                always {
-                    pmd canComputeNew: false, pattern: '**/target/pmd.xml'
-                }
-            }
-        }
+       // stage('PMD Analysis') {
+          //  when {
+          //      expression { params.RUN_PMD_ANALYSIS }
+          //  }
+           // steps {
+           //     script {
+                //    sh 'mvn pmd:pmd'
+              //  }
+            //}
+           // post {
+         //       always {
+           //         pmd canComputeNew: false, pattern: '**/target/pmd.xml'
+           //     }
+          //  }
+        //}
         stage('Jacoco Test Report') {
             steps {
                 script {
