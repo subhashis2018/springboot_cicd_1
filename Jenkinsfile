@@ -4,7 +4,6 @@ pipeline {
     tools {
         maven 'maven-3.9.6' // Adjust the Maven version as per your installation
         jdk 'jdk-17' // Adjust the JDK version as per your installation
-        git 'git'
     }
 
     environment {
@@ -39,12 +38,16 @@ pipeline {
         }
         stage('Maven Clean') {
             steps {
-                sh 'mvn clean'
+                withMaven(maven: 'maven-3.9.6') {
+                    sh 'mvn clean'
+                }
             }
         }
         stage('Maven Build') {
             steps {
-                sh 'mvn package'
+                withMaven(maven: 'maven-3.9.6') {
+                    sh 'mvn package'
+                }
             }
         }
         stage('Maven Test') {
@@ -52,12 +55,14 @@ pipeline {
                 expression { params.RUN_TESTS }
             }
             steps {
-                sh 'mvn test'
+                withMaven(maven: 'maven-3.9.6') {
+                    sh 'mvn test'
+                }
             }
         }
         stage('Jacoco Test Report') {
             steps {
-                script {
+                withMaven(maven: 'maven-3.9.6') {
                     sh 'mvn jacoco:report'
                 }
             }
