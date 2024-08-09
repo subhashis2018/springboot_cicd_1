@@ -9,6 +9,10 @@ pipeline {
 
     environment {
         GIT_REPO_URL = 'https://github.com/subhashis2018/springboot_cicd_1.git'
+        GITHUB_CREDENTIAL_ID= 'github-auth'
+        DOCKER_IMAGE = "subhashis2022/springboot_cicd_1"
+        DOCKER_TAG = "${env.BUILD_ID}"
+        DOCKER_REGISTRY_CREDENTIALS_ID = 'docker-auth'
     }
 
     parameters {
@@ -33,7 +37,7 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 script {
-                    git branch: "${params.BRANCH_NAME}", url: "${GIT_REPO_URL}", credentialsId: 'github-auth'
+                    git branch: "${params.BRANCH_NAME}", url: "${GIT_REPO_URL}", credentialsId: "${GITHUB_CREDENTIAL_ID}"
                 }
             }
         }
@@ -64,6 +68,33 @@ pipeline {
             post {
                 always {
                     jacoco execPattern: '**/target/jacoco.exec', classPattern: '**/target/classes', sourcePattern: '**/src/main/java'
+                }
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    echo "Building Docker Image"
+                    def imageName = "${DOCKER_IMAGE}:${DOCKER_TAG}"
+                    // Check if buildx instance is already running
+                    def buildxRunning = sh(script: 'docker ps -q -f "name=buildx_buildkit"', returnStatus: true)
+                    if (buildxRunning != 0) {
+                        sh 'docker buildx create --use'
+                    }
+                    sh "docker buildx build --load -t ${imageName} ."
+                    echo "Docker Image Built"
+                }
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    echo "Pushing Docker Image"
+                    def imageName = "${DOCKER_IMAGE}:${DOCKER_TAG}"
+                    docker.withRegistry('', "${DOCKER_REGISTRY_CREDENTIALS_ID}") {
+                        sh "docker push ${imageName}"
+                    }
+                    echo "Docker Image Pushed"
                 }
             }
         }
