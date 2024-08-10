@@ -73,14 +73,14 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-               script {
-		            echo "Building Docker Image"
-		            def imageName = "${DOCKER_IMAGE}:${DOCKER_TAG}"
-		            // Use the configured buildx builder
-		            sh "docker buildx use agitated_burnell"  // Ensure you're using the created builder
-		            sh "docker buildx build --load -t ${imageName} ."
-		            echo "Docker Image Built"
-        }
+                script {
+                    echo "Building Docker Image"
+                    def imageName = "${DOCKER_IMAGE}:${DOCKER_TAG}"
+                    // Use Docker Buildx as a subcommand of Docker
+                    sh "docker buildx create --use --name agitated_burnell || true"
+                    sh "docker buildx build --load -t ${imageName} ."
+                    echo "Docker Image Built"
+                }
             }
         }
         stage('Push Docker Image') {
