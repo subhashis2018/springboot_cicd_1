@@ -28,7 +28,7 @@ WORKDIR /app
 RUN useradd -m -u 1000 -s /bin/bash jenkin
 
 # Copy the JAR file from the build stage
-COPY --from=build /app/target/springboot_cicd_1-0.0.1-SNAPSHOT.jar /springboot_cicd_1-gitlab-0.0.1-SNAPSHOT.jar
+COPY --from=build /app/target/springboot_cicd_1-0.0.1-SNAPSHOT.jar /springboot_cicd_1-0.0.1-SNAPSHOT.jar
 
 # Expose the port the application will run on
 EXPOSE 8080
