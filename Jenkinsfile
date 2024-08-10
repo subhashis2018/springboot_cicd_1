@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     tools {
-        maven 'maven-3.9.6' // Adjust the Maven version as per your installation
-        jdk 'jdk-17' // Adjust the JDK version as per your installation
+        maven 'maven-3.9.6'
+        jdk 'jdk-17'
         git 'git'
     }
 
@@ -76,10 +76,10 @@ pipeline {
                 script {
                     echo "Building Docker Image"
                     def imageName = "${DOCKER_IMAGE}:${DOCKER_TAG}"
-                    // Create and use a buildx builder if necessary
-                    sh "docker buildx create --name agitated_burnell || true"
+                    // Create and inspect buildx builder without extra flags
+                    sh "docker buildx create || true"
                     sh "docker buildx inspect --bootstrap"
-                    sh "docker buildx build -t ${imageName} . --push"
+                    sh "docker buildx build --platform linux/amd64 -t ${imageName} . --push"
                     echo "Docker Image Built and Pushed"
                 }
             }
