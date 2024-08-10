@@ -76,22 +76,11 @@ pipeline {
                 script {
                     echo "Building Docker Image"
                     def imageName = "${DOCKER_IMAGE}:${DOCKER_TAG}"
-                    // Use Docker Buildx as a subcommand of Docker
-                    sh "docker buildx create --use --name agitated_burnell || true"
-                    sh "docker buildx build --load -t ${imageName} ."
-                    echo "Docker Image Built"
-                }
-            }
-        }
-        stage('Push Docker Image') {
-            steps {
-                script {
-                    echo "Pushing Docker Image"
-                    def imageName = "${DOCKER_IMAGE}:${DOCKER_TAG}"
-                    docker.withRegistry('', "${DOCKER_REGISTRY_CREDENTIALS_ID}") {
-                        sh "docker push ${imageName}"
-                    }
-                    echo "Docker Image Pushed"
+                    // Create and use a buildx builder if necessary
+                    sh "docker buildx create --name agitated_burnell || true"
+                    sh "docker buildx inspect --bootstrap"
+                    sh "docker buildx build -t ${imageName} . --push"
+                    echo "Docker Image Built and Pushed"
                 }
             }
         }
