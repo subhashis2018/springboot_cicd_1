@@ -24,6 +24,9 @@ FROM eclipse-temurin:17-jdk-alpine
 # Set the working directory in the container
 WORKDIR /app
 
+# Install bash on Alpine
+RUN apk update && apk add bash
+
 # Create a user for Jenkins with a valid shell path
 RUN useradd -m -u 1000 -s /bin/bash jenkin
 
