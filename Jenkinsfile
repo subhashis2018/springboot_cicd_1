@@ -76,13 +76,21 @@ pipeline {
                 script {
                     echo "Building Docker Image"
                     def imageName = "${DOCKER_IMAGE}:${DOCKER_TAG}"
-                    // Check if buildx instance is already running
-                    def buildxRunning = sh(script: 'docker ps -q -f "name=buildx_buildkit"', returnStatus: true)
-                    if (buildxRunning != 0) {
-                        sh 'docker buildx create --use'
-                    }
-                    sh "docker buildx build --load -t ${imageName} ."
+                    // Standard Docker build command
+                    sh "docker build -t ${imageName} ."
                     echo "Docker Image Built"
+                }
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    echo "Pushing Docker Image"
+                    def imageName = "${DOCKER_IMAGE}:${DOCKER_TAG}"
+                    docker.withRegistry('', "${DOCKER_REGISTRY_CREDENTIALS_ID}") {
+                        sh "docker push ${imageName}"
+                    }
+                    echo "Docker Image Pushed"
                 }
             }
         }
