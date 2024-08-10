@@ -1,4 +1,4 @@
-# Use the Eclipse Temurin 17 JDK image as the base image
+# Use the Eclipse Temurin 17 JDK image as the build stage
 FROM eclipse-temurin:17-jdk AS build
 
 # Set the working directory in the container
@@ -18,13 +18,13 @@ COPY src ./src
 # Package the application
 RUN ./mvnw package -DskipTests
 
-# Use the OpenJDK 17 JDK image as the final image
+# Use the Eclipse Temurin JDK image as the final image
 FROM eclipse-temurin:17-jdk-alpine
 
 # Set the working directory in the container
 WORKDIR /app
 
-# Create a user for Jenkins (use a valid shell path)
+# Create a user for Jenkins with a valid shell path
 RUN useradd -m -u 1000 -s /bin/bash jenkin
 
 # Copy the JAR file from the build stage
