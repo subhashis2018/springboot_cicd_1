@@ -79,7 +79,7 @@ pipeline {
                     // Check if buildx instance is already running
                     def buildxRunning = sh(script: 'docker ps -q -f "name=buildx_buildkit"', returnStatus: true)
                     if (buildxRunning != 0) {
-                        sh 'docker buildx create --use'
+                        sh 'docker buildx create --name mybuilder --use'
                     }
                     sh "docker buildx build --load -t ${imageName} ."
                     echo "Docker Image Built"
