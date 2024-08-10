@@ -73,17 +73,14 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                script {
-                    echo "Building Docker Image"
-                    def imageName = "${DOCKER_IMAGE}:${DOCKER_TAG}"
-                    // Check if buildx instance is already running
-                    def buildxRunning = sh(script: 'docker ps -q -f "name=buildx_buildkit"', returnStatus: true)
-                    if (buildxRunning != 0) {
-                        sh 'docker buildx create --name mybuilder --use'
-                    }
-                    sh "docker buildx build --load -t ${imageName} ."
-                    echo "Docker Image Built"
-                }
+               script {
+                echo "Building Docker Image"
+                def imageName = "${DOCKER_IMAGE}:${DOCKER_TAG}"
+                // Create and use a buildx builder
+                sh 'docker buildx create --use --name mybuilder || true'
+                sh "docker buildx build --load -t ${imageName} ."
+                echo "Docker Image Built"
+              }
             }
         }
         stage('Push Docker Image') {
