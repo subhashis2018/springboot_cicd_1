@@ -28,7 +28,7 @@ WORKDIR /app
 RUN apk update && apk add bash
 
 # Create a user for Jenkins with a valid shell path
-RUN useradd -m -u 1000 -s /bin/bash jenkin
+RUN adduser -D -u 1000 jenkin
 
 # Copy the JAR file from the build stage
 COPY --from=build /app/target/springboot-cicd-1.0.0.jar /springboot-cicd-1.0.0.jar
